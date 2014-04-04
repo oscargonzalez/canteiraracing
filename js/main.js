@@ -21,13 +21,17 @@ function init() {
 	debugDraw();             
 	window.setInterval(update,1000/60);
 	
-	createBox(640,30,320,480,b2Body.b2_staticBody,null);
+	// Suelo
+	createBox(640,30,320,480,b2Body.b2_staticBody,null);	
 	createBox(640,30,320,0,b2Body.b2_staticBody,null);
 	createBox(30,480,0,240,b2Body.b2_staticBody,null);
 	createBox(30,480,640,240,b2Body.b2_staticBody,null);
 	
+	// El buga!
+	createBox(130,33,100, 320, b2Body.b2_dynamicBody, document.getElementById("crate"));	
+	
 	document.addEventListener("mousedown",function(e){
-		createBox(64,64,e.clientX-canvasPosition.x,e.clientY-canvasPosition.y,b2Body.b2_dynamicBody,document.getElementById("crate"));
+		createBox(130,33,e.clientX-canvasPosition.x,e.clientY-canvasPosition.y,b2Body.b2_dynamicBody,document.getElementById("crate"));
 	});
 	
 	function createBox(width,height,pX,pY,type,data){
@@ -47,11 +51,12 @@ function init() {
 	}
 	
 	function debugDraw(){
+		// Esto hace que se vean las lineas de debug
 		var debugDraw = new b2DebugDraw();
 		debugDraw.SetSprite(document.getElementById("canvas").getContext("2d"));
 		debugDraw.SetDrawScale(30.0);
-		debugDraw.SetFillAlpha(0.5);
-		debugDraw.SetLineThickness(1.0);
+		debugDraw.SetFillAlpha(0.0);
+		debugDraw.SetLineThickness(0.0);
 		debugDraw.SetFlags(b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit);
 		world.SetDebugDraw(debugDraw);
 	}
