@@ -60,7 +60,7 @@ function init() {
 	var rueda2 = createBola(10, 10);
 
 	// El buga!
-	var buga = createBox(130,33,250, 620, b2Body.b2_dynamicBody, document.getElementById("crate"));		
+	var buga = createBox(130,33,250, 250, b2Body.b2_dynamicBody, document.getElementById("crate"));		
 
 	//create revolute joint between a and b (wheels)
 	// Rueda atras
@@ -73,7 +73,7 @@ function init() {
     joint_def.localAnchorB = new b2Vec2(0, 0);    
 
 	joint_def.enableMotor = true;
-    joint_def.motorSpeed = 5;
+    joint_def.motorSpeed = 25;
     joint_def.maxMotorTorque = 150;            
 
     world.CreateJoint(joint_def);    
@@ -91,6 +91,8 @@ function init() {
    	//add the joint to the world
     world.CreateJoint(joint_def);    
 
+    drawGround();
+
 
     // Aceleracion
     //buga.SetLinearVelocity( b2Vec2(1, 0) );
@@ -99,37 +101,19 @@ function init() {
 		createBox(130,33,e.clientX-canvasPosition.x,e.clientY-canvasPosition.y,b2Body.b2_dynamicBody,document.getElementById("crate"));				
 	});	
 
-	function GetBodyAtMouse(includeStatic)
-	{
-	    var mouse_p = new b2Vec2(mouse_x, mouse_y);
-	     
-	    var aabb = new b2AABB();
-	    aabb.lowerBound.Set(mouse_x - 0.001, mouse_y - 0.001);
-	    aabb.upperBound.Set(mouse_x + 0.001, mouse_y + 0.001);
-	     
-	    var body = null;
-	     
-	    // Query the world for overlapping shapes.
-	    function GetBodyCallback(fixture)
-	    {
-	        var shape = fixture.GetShape();
-	         
-	        if (fixture.GetBody().GetType() != b2Body.b2_staticBody || includeStatic)
-	        {
-	            var inside = shape.TestPoint(fixture.GetBody().GetTransform(), mouse_p);
-	             
-	            if (inside)
-	            {
-	                body = fixture.GetBody();
-	                return false;
-	            }
-	        }
-	         
-	        return true;
-	    }
-	     
-	    world.QueryAABB(GetBodyCallback, aabb);
-	    return body;
+	function drawGround() {
+
+		var x = 0;
+		var y = 0;
+		var inc = 0;
+		var inc2 = 0;
+
+		for (x=0 ; x<(640) ; x+=5)
+		{
+			createBox(5,5,x,390+( (Math.sin(inc)*2) + (Math.sin(inc2)*(inc*0.2)) ),b2Body.b2_staticBody,null);			
+			inc += 0.1;
+			inc2 += 0.4;
+		}		
 	}
 	
 	function createBox(width,height,pX,pY,type,data){
@@ -249,7 +233,7 @@ function init() {
 		debugDraw.SetDrawScale(30.0);
 		debugDraw.SetFillAlpha(0.0);
 		debugDraw.SetLineThickness(0.0);
-		//debugDraw.SetFlags(b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit);
+		debugDraw.SetFlags(b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit);
 		world.SetDebugDraw(debugDraw);
 
 	}
