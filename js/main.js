@@ -1,13 +1,25 @@
 
 // Definiciones estandar
-var	b2Vec2 = Box2D.Common.Math.b2Vec2,
-	b2BodyDef = Box2D.Dynamics.b2BodyDef,
-	b2Body = Box2D.Dynamics.b2Body,
-	b2FixtureDef = Box2D.Dynamics.b2FixtureDef,
-	b2World = Box2D.Dynamics.b2World,
-	b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape,
-	b2CircleShape = Box2D.Collision.Shapes.b2CircleShape,
-	b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
+var b2Vec2 = Box2D.Common.Math.b2Vec2
+    , b2AABB = Box2D.Collision.b2AABB
+    , b2BodyDef = Box2D.Dynamics.b2BodyDef
+    , b2Body = Box2D.Dynamics.b2Body
+    , b2FixtureDef = Box2D.Dynamics.b2FixtureDef
+    , b2Fixture = Box2D.Dynamics.b2Fixture
+    , b2World = Box2D.Dynamics.b2World
+    , b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape
+    , b2CircleShape = Box2D.Collision.Shapes.b2CircleShape
+    , b2DebugDraw = Box2D.Dynamics.b2DebugDraw
+    , b2MouseJointDef =  Box2D.Dynamics.Joints.b2MouseJointDef
+    , b2RevoluteJointDef =  Box2D.Dynamics.Joints.b2RevoluteJointDef
+    , b2Shape = Box2D.Collision.Shapes.b2Shape
+    ;
+
+//Convert coordinates in canvas to box2d world
+function get_real(p)
+{
+    return new b2Vec2(p.x + 0, canvas_height_m - p.y);
+}    
 
 // Inicio
 function init() {
@@ -34,21 +46,91 @@ function init() {
 	window.setInterval(update,1000/60);
 	
 	// Suelo
-	createBox(640,30,320,480,b2Body.b2_staticBody,null);	
+	var ground = createBox(640,30,320,480,b2Body.b2_staticBody,null);	
 	createBox(640,30,320,0,b2Body.b2_staticBody,null);
 	createBox(30,480,0,240,b2Body.b2_staticBody,null);
 	createBox(30,480,640,240,b2Body.b2_staticBody,null);
-	
-	// El buga!
-	createBox(130,33,100, 320, b2Body.b2_dynamicBody, document.getElementById("crate"));	
+
+	// EJEMPLOS REVOLUTION JOIN:
+	// http://www.binarytides.com/revolute-joint-box2d-javascript/
 
 	// Rueda
 	//cw_createWheel(20, 1.0);
-	createBola();
+	var rueda1 = createBola(10, 10);
+	var rueda2 = createBola(10, 10);
+
+	// El buga!
+	var buga = createBox(130,33,250, 620, b2Body.b2_dynamicBody, document.getElementById("crate"));		
+
+	//create revolute joint between a and b (wheels)
+	// Rueda atras
+    var joint_def = new b2RevoluteJointDef();
+    joint_def.bodyA = buga;
+    joint_def.bodyB = rueda1;	
+
+	//connect the centers - center in local coordinate - relative to body is 0,0
+    joint_def.localAnchorA = new b2Vec2(-1.25, 0.4);
+    joint_def.localAnchorB = new b2Vec2(0, 0);    
+
+	joint_def.enableMotor = true;
+    joint_def.motorSpeed = 90;
+    joint_def.maxMotorTorque = 150;            
+
+    world.CreateJoint(joint_def);    
+
+    // Rueda alante
+    joint_def.bodyA = buga;
+    joint_def.bodyB = rueda2;	
+
+    joint_def.enableMotor = false;
+
+	//connect the centers - center in local coordinate - relative to body is 0,0
+    joint_def.localAnchorA = new b2Vec2(1.25, 0.4);
+    joint_def.localAnchorB = new b2Vec2(0, 0);        
+
+   	//add the joint to the world
+    world.CreateJoint(joint_def);    
+
+
+    // Aceleracion
+    //buga.SetLinearVelocity( b2Vec2(1, 0) );
 	
 	document.addEventListener("mousedown",function(e){
-		createBox(130,33,e.clientX-canvasPosition.x,e.clientY-canvasPosition.y,b2Body.b2_dynamicBody,document.getElementById("crate"));
-	});
+		createBox(130,33,e.clientX-canvasPosition.x,e.clientY-canvasPosition.y,b2Body.b2_dynamicBody,document.getElementById("crate"));				
+	});	
+
+	function GetBodyAtMouse(includeStatic)
+	{
+	    var mouse_p = new b2Vec2(mouse_x, mouse_y);
+	     
+	    var aabb = new b2AABB();
+	    aabb.lowerBound.Set(mouse_x - 0.001, mouse_y - 0.001);
+	    aabb.upperBound.Set(mouse_x + 0.001, mouse_y + 0.001);
+	     
+	    var body = null;
+	     
+	    // Query the world for overlapping shapes.
+	    function GetBodyCallback(fixture)
+	    {
+	        var shape = fixture.GetShape();
+	         
+	        if (fixture.GetBody().GetType() != b2Body.b2_staticBody || includeStatic)
+	        {
+	            var inside = shape.TestPoint(fixture.GetBody().GetTransform(), mouse_p);
+	             
+	            if (inside)
+	            {
+	                body = fixture.GetBody();
+	                return false;
+	            }
+	        }
+	         
+	        return true;
+	    }
+	     
+	    world.QueryAABB(GetBodyCallback, aabb);
+	    return body;
+	}
 	
 	function createBox(width,height,pX,pY,type,data){
 		var bodyDef = new b2BodyDef;
@@ -61,19 +143,18 @@ function init() {
 		
 		polygonShape.SetAsBox(width/2/worldScale,height/2/worldScale);
 		
-		fixtureDef.density = 1.0;
+		fixtureDef.density = 2.0;
 		fixtureDef.friction = 0.5;
-		fixtureDef.restitution = 0.5;
+		fixtureDef.restitution = 0.2;
 		fixtureDef.shape = polygonShape;
 
 		var body=world.CreateBody(bodyDef);
 		body.CreateFixture(fixtureDef);
+
+		return body;
 	}
 
-	function createBola() {
-
-		var pX = 120;
-		var pY = 110;
+	function createBola(pX, pY) {
 
 		var ballDef = new b2BodyDef;
 		ballDef.type = b2Body.b2_dynamicBody;
@@ -82,39 +163,23 @@ function init() {
 	  
 		var fixture = new b2FixtureDef;
 		fixture.density = 10;
-		fixture.friction = 0.5;
-		fixture.restitution = 0.8;
+		fixture.friction = 2.9;
+		fixture.restitution = 0.1;
 		fixture.shape =  new b2CircleShape(10/30); // Establecemos el radio (1m=30px)
 	  
 		var ball = world.CreateBody(ballDef)
 		ball.CreateFixture(fixture);
 	  
 		// Generamos una velocidad aleatoria
-		var velocityFactor = 10,
+		/*
+		var velocityFactor = 30,
 			randVelocity = Math.round(Math.random()*velocityFactor*2)-velocityFactor;
 	  
 		ball.SetLinearVelocity(new b2Vec2(randVelocity,0)) // Establecemos la velocidad con la que saldrá la bola
+		*/
 
-		balls.push(ball);	
+		return ball;
 	}
-
-	function cw_createWheel(radius, density) {
-	  var body_def = new b2BodyDef();
-	  body_def.type = b2Body.b2_dynamicBody;
-	  body_def.position.Set(100, 100);
-
-	  var body = world.CreateBody(body_def);
-
-	  var fix_def = new b2FixtureDef();
-	  fix_def.shape = new b2CircleShape(radius);
-	  fix_def.density = density;
-	  fix_def.friction = 1;
-	  fix_def.restitution = 0.2;
-	  fix_def.filter.groupIndex = -1;
-
-	  body.CreateFixture(fix_def);
-
-	}	
 
 	// Samples:
 	// http://box2d-js.sourceforge.net/index2.html
@@ -181,8 +246,8 @@ function init() {
 		var debugDraw = new b2DebugDraw();
 		debugDraw.SetSprite(document.getElementById("canvas").getContext("2d"));
 		debugDraw.SetDrawScale(30.0);
-		debugDraw.SetFillAlpha(0.5);
-		debugDraw.SetLineThickness(1.0);
+		debugDraw.SetFillAlpha(0.0);
+		debugDraw.SetLineThickness(0.0);
 		debugDraw.SetFlags(b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit);
 		world.SetDebugDraw(debugDraw);
 	}
