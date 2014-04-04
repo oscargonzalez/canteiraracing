@@ -73,7 +73,7 @@ function init() {
     joint_def.localAnchorB = new b2Vec2(0, 0);    
 
 	joint_def.enableMotor = true;
-    joint_def.motorSpeed = 90;
+    joint_def.motorSpeed = 5;
     joint_def.maxMotorTorque = 150;            
 
     world.CreateJoint(joint_def);    
@@ -243,13 +243,15 @@ function init() {
 	
 	function debugDraw(){
 		// Esto hace que se vean las lineas de debug
+		
 		var debugDraw = new b2DebugDraw();
 		debugDraw.SetSprite(document.getElementById("canvas").getContext("2d"));
 		debugDraw.SetDrawScale(30.0);
 		debugDraw.SetFillAlpha(0.0);
 		debugDraw.SetLineThickness(0.0);
-		debugDraw.SetFlags(b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit);
+		//debugDraw.SetFlags(b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit);
 		world.SetDebugDraw(debugDraw);
+
 	}
 	
 	function update() { 
