@@ -23,17 +23,8 @@ function get_real(p)
 
 // Inicio
 function init() {
-	var b2Vec2 = Box2D.Common.Math.b2Vec2;
-	var b2AABB = Box2D.Collision.b2AABB;
-	var b2BodyDef = Box2D.Dynamics.b2BodyDef;
-	var b2Body = Box2D.Dynamics.b2Body;
-	var b2FixtureDef = Box2D.Dynamics.b2FixtureDef;
-	var b2Fixture = Box2D.Dynamics.b2Fixture;
-	var b2World = Box2D.Dynamics.b2World;
-	var b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape;
-	var b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
 	
-	var canvas = document.getElementById("canvas");
+	var canvas = document.getElementById("respondCanvas");
 	var context = canvas.getContext("2d");
      
 	var worldScale = 30;
@@ -46,10 +37,8 @@ function init() {
 	window.setInterval(update,1000/60);
 	
 	// Suelo
-	var ground = createBox(640,30,320,480,b2Body.b2_staticBody,null);	
-	createBox(640,30,320,0,b2Body.b2_staticBody,null);
-	createBox(30,480,0,240,b2Body.b2_staticBody,null);
-	createBox(30,480,640,240,b2Body.b2_staticBody,null);
+	var ground = createBox($('#respondCanvas').width(),30,0,$('#respondCanvas').height()-30,b2Body.b2_staticBody,null);	
+	//document.writeln($('#respondCanvas').height());
 
 	// EJEMPLOS REVOLUTION JOIN:
 	// http://www.binarytides.com/revolute-joint-box2d-javascript/
@@ -60,7 +49,7 @@ function init() {
 	var rueda2 = createBola(10, 10);
 
 	// El buga!
-	var buga = createBox(130,33,250, 250, b2Body.b2_dynamicBody, document.getElementById("crate"));		
+	var buga = createBox(130,33,250, 100, b2Body.b2_dynamicBody, document.getElementById("crate"));		
 
 	//create revolute joint between a and b (wheels)
 	// Rueda atras
@@ -108,9 +97,15 @@ function init() {
 		var inc = 0;
 		var inc2 = 0;
 
-		for (x=0 ; x<(640) ; x+=5)
+		var block_size = 15;
+
+		var cw = $('#respondCanvas').width();
+		var ch = $('#respondCanvas').height();
+
+		for (x=0 ; x<(cw) ; x+=block_size)
 		{
-			createBox(5,5,x,390+( (Math.sin(inc)*2) + (Math.sin(inc2)*(inc*0.2)) ),b2Body.b2_staticBody,null);			
+			//createBox(5,5,x,10+(Math.sin(inc)*2),b2Body.b2_staticBody,null);			
+			createBox(block_size,5,x,((ch/2)+90)+Math.sin(inc)*9,b2Body.b2_staticBody,null);
 			inc += 0.1;
 			inc2 += 0.4;
 		}		
@@ -229,7 +224,7 @@ function init() {
 		// Esto hace que se vean las lineas de debug
 		
 		var debugDraw = new b2DebugDraw();
-		debugDraw.SetSprite(document.getElementById("canvas").getContext("2d"));
+		debugDraw.SetSprite(document.getElementById("respondCanvas").getContext("2d"));
 		debugDraw.SetDrawScale(30.0);
 		debugDraw.SetFillAlpha(0.0);
 		debugDraw.SetLineThickness(0.0);

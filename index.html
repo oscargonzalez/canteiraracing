@@ -1,16 +1,72 @@
 <html>
 	<head>
 		<title>Canteira!</title>				
+
+		<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+		<script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+
 		<script type="text/javascript" src="js/Box2dWeb-2.1.a.3.min.js"></script>
 		<!--<script type="text/javascript" src="js/box2d.js"></script>-->
 		<script type="text/javascript" src="js/main.js"></script>
+
+		<style>
+		  	html, body{ margin:0px; padding:0px; }
+		  	body{ display:block; width:100%; height:100%; }
+		  	#main{ display:block; width:80%; padding:0px 5%; height:300px; border:1px solid red; }
+		  	#respondCanvas{ border:1px solid blue; }
+		</style>
 	</head>
 	<body onload="init();" style="margin:0px">
 		<h1>Canteira Racing - Delorean Edition</h1>
-		<canvas id="canvas" width="640" height="480" style="background-color:#333333;"></canvas>
+		<!--<canvas id="canvas" width="100%" height="480" style="background-color:#333333;"></canvas>-->
+
+    <div id="main" role="main">
+	    <canvas id="respondCanvas" width="100" height="100">
+	    	<!-- Provide fallback -->
+	    </canvas>
+    </div>
+
 		<div id="assets" style="display:none">
 			<img id="crate" src="img/delorean-base.png" />
 			<img id="rueda" src="img/rueda-base.png" />
 		</div>
    	</body>
+
+   	<script>
+	  	$(document).ready( function(){
+	  		
+	  		//Get the canvas & context
+	  		var c = $('#respondCanvas');
+	  		var ct = c.get(0).getContext('2d');
+	  		var container = $(c).parent();
+	  		
+	  		//Run function when browser  resize
+		  	$(window).resize( respondCanvas );
+		  	
+		  	function respondCanvas(){
+	  			c.attr('width', $(container).width() ); //max width
+	  			c.attr('height', $(container).height() ); //max height
+	  			
+	  			//Redraw & reposition content
+	  			/*
+	  			var x = c.width();
+	  			var y = c.height();  			
+	  			ct.font = "20px Calibri";
+	  			
+	  			ct.fillStyle = "#DDDDDD"; //black
+	  			ct.fillRect( 0, 0, x, y); //fill the canvas
+	  			/*
+	  			var resizeText = "Canvas width: "+c.width()+"px";
+	  			ct.textAlign = "center";
+	  			ct.fillStyle = "#333333"; //white
+		  		ct.fillText(resizeText, (x/2), (y/2) );
+		  		*/
+		  		
+			}
+			
+			//Initial call
+			respondCanvas();
+	  	});
+   	</script>
+
 </html>
