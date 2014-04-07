@@ -80,6 +80,7 @@ function init() {
    	//add the joint to the world
     world.CreateJoint(joint_def);    
 
+	
     drawGround();
 
 
